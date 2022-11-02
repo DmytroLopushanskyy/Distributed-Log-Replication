@@ -1,4 +1,0 @@
-FastAPI
-uvicorn
-httpx
-asyncio
