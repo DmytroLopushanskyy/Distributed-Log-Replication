@@ -1,0 +1,7 @@
+FastAPI
+uvicorn
+gunicorn
+colorlog
+python-consul
+python-dotenv
+requests

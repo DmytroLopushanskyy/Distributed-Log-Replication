@@ -1,0 +1,90 @@
+version: "3.9"
+
+services:
+  consul-server1:
+    image: hashicorp/consul:1.13.3
+    container_name: consul-server1
+    restart: always
+    volumes:
+      - ./config/server1.json:/consul/config/server1.json:ro
+      - ./certs/:/consul/config/certs/:ro
+    networks:
+      - base
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    command: "agent -bootstrap-expect=3"
+
+  consul-server2:
+    image: hashicorp/consul:1.13.3
+    container_name: consul-server2
+    restart: always
+    volumes:
+      - ./config/server2.json:/consul/config/server2.json:ro
+      - ./certs/:/consul/config/certs/:ro
+    networks:
+      - base
+    command: "agent -bootstrap-expect=3"
+
+  consul-server3:
+    image: hashicorp/consul:1.13.3
+    container_name: consul-server3
+    restart: always
+    volumes:
+      - ./config/server3.json:/consul/config/server3.json:ro
+      - ./certs/:/consul/config/certs/:ro
+    networks:
+      - base
+    command: "agent -bootstrap-expect=3"
+
+  consul-client:
+    image: hashicorp/consul:1.13.3
+    container_name: consul-client
+    restart: always
+    volumes:
+      - ./config/client.json:/consul/config/client.json:ro
+      - ./certs/:/consul/config/certs/:ro
+    networks:
+      - base
+    command: "agent"
+
+  main-node:
+    image: dmytrolopushanskyy/distributed-log-replication:main-node
+    build: ./main-node
+    ports:
+      - "3000:3000"
+    networks:
+      - base
+
+  secondary-node-1:
+    image: dmytrolopushanskyy/distributed-log-replication:secondary-node
+    build:
+      context: ./secondary-node
+      args:
+        - APP_PORT=3001
+    ports:
+      - "3001:3001"
+    networks:
+      - base
+    environment:
+      - APP_HOST=secondary-node-1
+      - APP_PORT=3001
+
+  secondary-node-2:
+    image: dmytrolopushanskyy/distributed-log-replication:secondary-node
+    build:
+      context: ./secondary-node
+      args:
+        - APP_PORT=3002
+    ports:
+      - "3002:3002"
+    networks:
+      - base
+    environment:
+      - APP_HOST=secondary-node-2
+      - APP_PORT=3002
+
+networks:
+  base:
+    driver: bridge
