@@ -7,7 +7,7 @@ The task is to create one main node and any number of secondary nodes that are g
 ## Features
 
 * Solution is fully dockerized with docker-compose
-* Satisfy all functional requirements
+* Satisfies all functional requirements
 * Includes an additional Consul service for service discovery
 * Includes a custom logger that nicely formats any output messages
 
