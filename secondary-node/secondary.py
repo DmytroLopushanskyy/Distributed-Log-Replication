@@ -1,4 +1,6 @@
+import os
 import time
+import asyncio
 from fastapi import FastAPI, Body
 
 from services.consul_service import ConsulService
@@ -11,10 +13,13 @@ data_access = DataAccess()
 
 
 @app.put('/append')
-async def append(msg: str = Body(..., title="msg", embed=True)):
+async def append(msg: str = Body(..., title="msg", embed=True),
+                 msg_id: int = Body(..., title="msg", embed=True)):
     try:
-        data_access.save_data(msg)
-        time.sleep(5)
+        delay = int(os.getenv("DELAY"))
+        await asyncio.sleep(delay)
+
+        data_access.save_data(msg, msg_id)
         logger.info(f'Successfully added msg {msg}')
     except Exception as err:
         logger.error(f'Adding failed. There was the following error: {err}')
