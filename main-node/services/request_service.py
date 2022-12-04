@@ -1,5 +1,6 @@
-from requests import put
-from threading import Thread
+import json
+import asyncio
+import aiohttp
 
 from application.custom_logger import logger
 from application.count_down_latch import CountDownLatch
@@ -10,30 +11,23 @@ class RequestService:
         self.timeout = timeout
         self.latch = CountDownLatch(write_concern)
 
-    def send_payload(self, urls, payload):
+    async def send_payload(self, urls, payload):
         for url in urls:
-            self.async_request(self.guarded_put, url, json=payload)
+            asyncio.create_task(self.async_request(url, payload=payload))
 
-        self.latch.wait()
+        await self.latch.wait()
 
-    def async_request(self, method, *args, **kwargs):
-        """
-        Makes request on a different thread
-        """
-        kwargs['hooks'] = {'response': self.request_callback}
-        kwargs['timeout'] = self.timeout
-        thread = Thread(target=method, args=args, kwargs=kwargs)
-        thread.start()
-        return thread
+    async def async_request(self, url, payload):
+        conn = aiohttp.TCPConnector(limit=None, ttl_dns_cache=300)
+        session = aiohttp.ClientSession(connector=conn)
 
-    def request_callback(self, response, *_, **__):
-        logger.info(f"Response code received: {response.status_code}")
-        if response.status_code == 200:
-            self.latch.count_down()
+        async with session.put(url, json=payload, ssl=False) as response:
+            obj = await response.read()
+            json_response = json.loads(obj.decode('utf-8'))
+            logger.info(f"Response code received: {json_response}")
+            if json_response['status'] == 'ok':
+                await self.latch.count_down()
+                logger.info(f"done")
 
-    @staticmethod
-    def guarded_put(*args, **kwargs):
-        try:
-            put(*args, **kwargs)
-        except Exception as err:
-            logger.error(f"Request error: {err}")
+        await session.close()
+        await conn.close()

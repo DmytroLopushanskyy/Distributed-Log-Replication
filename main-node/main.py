@@ -31,7 +31,7 @@ async def append(msg: str = Body(..., title="msg", embed=True),
 
     urls = [f"{dest_url}/append" for dest_url in secondary_services]
     req_service = RequestService(write_concern)
-    req_service.send_payload(urls, {"msg": msg, "msg_id": assigned_id})
+    await req_service.send_payload(urls, {"msg": msg, "msg_id": assigned_id})
 
     # will either return ok or wait forever for write_concern to be satisfied
     return {'status': 'ok'}
