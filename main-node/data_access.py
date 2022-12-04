@@ -1,24 +1,36 @@
 """
 This module is responsible for getting the data for the facade service.
 """
-import uuid
 from application.custom_logger import logger
 
 
 class DataAccess:
     def __init__(self):
-        self.__data_dict = dict()
+        self.__data = list()
+        self.last_id = -1
 
-    def save_data(self, msg) -> None:
+    def save_data(self, msg) -> int:
         """ Save data to local memory """
-        assigned_uuid = self.__create_id()
-        self.__data_dict[assigned_uuid] = msg
-
-    @staticmethod
-    def __create_id() -> str:
-        """ Create unique UUID """
-        return str(uuid.uuid4())
+        assigned_id = self.last_id + 1
+        self.__data.append((assigned_id, msg))
+        self.last_id = assigned_id
+        logger.info(f'Successfully added msg {msg}')
+        return assigned_id
 
     def get_data(self):
-        logger.info(list(self.__data_dict.values()))
-        return list(self.__data_dict.values())
+        gap_idx = self.find_first_gap_idx()
+        # return only messages without their indexes
+        return [msg[1] for msg in self.__data[:gap_idx]]
+
+    def find_first_gap_idx(self) -> int:
+        """
+        Finds first gap index in the data.
+        Assumes data indexing starts at 0 index.
+        """
+        last_id = -1
+        for item in self.__data:
+            msg_id = item[0]
+            if msg_id - last_id != 1:
+                return last_id + 1
+            last_id = msg_id
+        return last_id + 1

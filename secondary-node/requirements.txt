@@ -5,3 +5,4 @@ colorlog
 python-consul
 python-dotenv
 requests
+asyncio

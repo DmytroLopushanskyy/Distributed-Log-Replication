@@ -8,4 +8,4 @@ WORKDIR .
 
 ARG APP_PORT
 ENV APP_PORT=${APP_PORT}
-CMD gunicorn secondary:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:"$APP_PORT"
+CMD gunicorn secondary:app -w 1 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:"$APP_PORT"
