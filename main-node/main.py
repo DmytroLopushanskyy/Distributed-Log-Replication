@@ -28,6 +28,11 @@ async def append(msg: str = Body(..., title="msg", embed=True),
         logger.warn("Quorum not satisfied, read-only mode activated")
         return {'status': 'false', 'message': 'Quorum is not satisfied as majority nodes is unhealthy. '
                                               'The service is read-only. Try again to append later.'}
+      
+    if write_concern > len(secondary_services):
+        return {'status': 'false', 'error': 'There are not enough secondary services discovered to satisfy the write '
+                                            'concern parameter. Please start more services so that they are discovered,'
+                                            ' and requests can be routed to them'}
 
     try:
         assigned_id = data_access.save_data(msg)
