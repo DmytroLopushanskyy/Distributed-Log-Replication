@@ -23,8 +23,7 @@ class Consul:
                 health_check_url = f'http://{os.getenv("APP_HOST")}:{os.getenv("APP_PORT")}/health'
                 health_check = consul.Check().http(
                     url=health_check_url,
-                    interval="20s",
-                    deregister="60s"
+                    interval="20s"
                 )
                 self.__consul_client.agent.service.register(
                     name=os.getenv("APP_NAME"),
