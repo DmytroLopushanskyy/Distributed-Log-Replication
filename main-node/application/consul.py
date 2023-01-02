@@ -42,5 +42,20 @@ class Consul:
                 for item in data]
         return urls
 
+    def get_health_report(self, service_name):
+        checks = self.__consul_client.health.checks(service_name)[1]
+        results = dict()
+        for check in checks:
+            results[check.get('ServiceID')] = check.get('Status')
+        return results
+
+    def get_healthy_urls(self, service_name):
+        checks = self.__consul_client.health.checks(service_name)[1]
+        results = list()
+        for check in checks:
+            if check.get('Status') == 'passing':
+                results.append(f"http://{check['ServiceID']}")
+        return results
+
     def deregister(self):
         self.__consul_client.agent.service.deregister(self.service_id)
