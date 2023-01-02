@@ -12,9 +12,11 @@ class DataAccess:
     def save_data(self, msg) -> int:
         """ Save data to local memory """
         assigned_id = self.last_id + 1
-        self.__data.append((assigned_id, msg))
-        self.last_id = assigned_id
-        logger.info(f'Successfully added msg {msg}')
+        if (assigned_id, msg) not in self.__data:
+            self.__data.append((assigned_id, msg))
+            self.__data.sort(key=lambda item: item[0])  # Sort it
+            self.last_id = assigned_id
+            logger.info(f'Successfully added msg {msg}')
         return assigned_id
 
     def get_data(self):

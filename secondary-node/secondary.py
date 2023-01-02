@@ -1,5 +1,4 @@
 import os
-import time
 import asyncio
 from fastapi import FastAPI, Body
 
@@ -32,6 +31,12 @@ async def append(msg: str = Body(..., title="msg", embed=True),
 async def list_messages():
     messages = data_access.get_data()
     return {'status': 'ok', 'list': f"{', '.join(messages)}"}
+
+
+@app.get('/health')
+async def health_check():
+    logger.info('Health request!')
+    return {'status': 'ok'}
 
 
 @app.on_event("shutdown")

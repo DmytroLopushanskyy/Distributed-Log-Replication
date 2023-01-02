@@ -20,11 +20,18 @@ class Consul:
 
         while True:
             try:
+                health_check_url = f'http://{os.getenv("APP_HOST")}:{os.getenv("APP_PORT")}/health'
+                health_check = consul.Check().http(
+                    url=health_check_url,
+                    interval="20s",
+                    deregister="60s"
+                )
                 self.__consul_client.agent.service.register(
                     name=os.getenv("APP_NAME"),
                     service_id=self.service_id,
                     address=os.getenv("APP_HOST"),
-                    port=int(os.getenv("APP_PORT"))
+                    port=int(os.getenv("APP_PORT")),
+                    check=health_check
                 )
                 break
             except requests.exceptions.ConnectionError as exception:

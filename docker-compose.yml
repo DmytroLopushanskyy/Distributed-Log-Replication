@@ -85,7 +85,7 @@ services:
     environment:
       - APP_HOST=secondary-node-2
       - APP_PORT=3002
-      - DELAY=10
+      - DELAY=0
 
 networks:
   base:
